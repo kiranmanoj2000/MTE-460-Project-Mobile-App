@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "41102862702",
+    "firebase_url": "https://mte460-project-default-rtdb.firebaseio.com",
+    "project_id": "mte460-project",
+    "storage_bucket": "mte460-project.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:41102862702:android:62462ee6e445a2ffd3b97f",
+        "android_client_info": {
+          "package_name": "com.example.mte460project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "41102862702-702cgbkkrf85o7ndk3bb683krbb8lbti.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfMIr5dqHCMuZJdmbpexjbEc8I6b02104"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "41102862702-702cgbkkrf85o7ndk3bb683krbb8lbti.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

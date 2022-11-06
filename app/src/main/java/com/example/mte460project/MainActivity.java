@@ -2,6 +2,8 @@ package com.example.mte460project;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -14,10 +16,16 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity {
 
+    String conveyorArray[];
+    String dateArray[];
+
+    RecyclerView recyclerView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
         Context n = this;
@@ -32,5 +40,14 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(n, "SUCESS", Toast.LENGTH_LONG);
             }
         });
+
+        recyclerView = findViewById(R.id.recyclerView);
+
+        conveyorArray = getResources().getStringArray(R.array.conveyorBeltId);
+        dateArray = getResources().getStringArray(R.array.createdDate);
+
+        RecycleAdapter recycleAdapter = new RecycleAdapter(this, conveyorArray, dateArray);
+        recyclerView.setAdapter(recycleAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 }

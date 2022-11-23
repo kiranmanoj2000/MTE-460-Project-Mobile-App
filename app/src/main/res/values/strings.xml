@@ -106,4 +106,12 @@
         <item>ConveyorBelt 4</item>
         <item>ConveyorBelt 5</item>
     </string-array>
+
+    <string-array name="ConveyorDropdown">
+        <item>Conveyor 1</item>
+        <item>Conveyor 2</item>
+        <item>Conveyor 3</item>
+        <item>Conveyor 4</item>
+        <item>Conveyor 5</item>
+    </string-array>
 </resources>

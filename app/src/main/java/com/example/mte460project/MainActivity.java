@@ -8,6 +8,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -35,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Spinner spinnerConveyor  = findViewById(R.id.spinner_conveyor);
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         // .child("specific string")
@@ -93,5 +98,10 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        ArrayAdapter <CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.ConveyorDropdown, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+
+        spinnerConveyor.setAdapter(adapter);
     }
 }

@@ -9,35 +9,40 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.List;
+
 public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.MyViewHolder> {
 
     String data1[], data2[];
     Context context;
+    List<DroppedPackage> droppedPackageList;
 
-    public RecycleAdapter(Context ct, String s1[], String s2[]){
-        context = ct;
-        data1 = s1;
-        data2 = s2;
+    public RecycleAdapter(List<DroppedPackage> droppedPackageListA){
+        this.droppedPackageList = droppedPackageListA;
     }
 
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View view = inflater.inflate(R.layout.my_row, parent, false);
+        //LayoutInflater inflater = LayoutInflater.from(context);
+        //LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        //View view = inflater.inflate(R.layout.my_row, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.my_row, parent, false);
         return new MyViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.myText1.setText(data1[position]);
-        holder.myText2.setText(data2[position]);
+        DroppedPackage droppedPackage = droppedPackageList.get(position);
+
+        holder.myText1.setText(droppedPackage.getConveyorBeltId());
+        holder.myText2.setText(String.valueOf(droppedPackage.getCreatedDate()));
     }
 
     @Override
     public int getItemCount() {
         // myText1.length to return length of array
-        return data1.length;
+        return droppedPackageList.size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder{

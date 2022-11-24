@@ -34,12 +34,17 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     RecycleAdapter helperAdapter;
 
+    private Spinner spinner;
+    private ArrayList<ConveyorName> conveyorname = new ArrayList<>();
+    private ArrayList<String> conveyornamestring = new ArrayList<>();
+    private DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Spinner spinnerConveyor  = findViewById(R.id.spinner_conveyor);
+        //Spinner spinnerConveyor  = findViewById(R.id.spinner_conveyor);
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         // .child("specific string")
@@ -99,9 +104,42 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        ArrayAdapter <CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.ConveyorDropdown, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+        //ArrayAdapter <CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.ConveyorDropdown, android.R.layout.simple_spinner_item);
+        //adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+        //spinnerConveyor.setAdapter(adapter);
 
-        spinnerConveyor.setAdapter(adapter);
+        // Show conveyor names in spinner
+        spinner = findViewById(R.id.spinner);
+        showDataSpinner();
+    }
+
+    private void showDataSpinner()
+    {
+        dbRef.child("conveyorBelts").addValueEventListener(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                conveyorname.clear();
+                conveyornamestring.clear();
+                for(DataSnapshot item : snapshot.getChildren())
+                {
+                    String compId = item.child("companyId").getValue(String.class);
+                    Long cdate = item.child("createdDate").getValue(Long.class);
+                    String cname = item.child("companyId").getValue(String.class);
+
+                    ConveyorName conveyordata = new ConveyorName(compId, cdate, cname);
+                    conveyorname.add(conveyordata);
+                    conveyornamestring.add(cname);
+                }
+
+                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_spinner_item, conveyornamestring);
+                spinner.setAdapter(arrayAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }

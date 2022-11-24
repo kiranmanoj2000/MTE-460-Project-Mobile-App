@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -17,6 +19,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
@@ -25,6 +29,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private FirebaseAuth mAuth;
+
+    private SharedPreferences sharedPref;
 
     String conveyorArray[];
     String dateArray[];
@@ -43,25 +51,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mAuth = FirebaseAuth.getInstance();
+        sharedPref = this.getSharedPreferences("com.example.mte460project", Context.MODE_PRIVATE);
 
-        //Spinner spinnerConveyor  = findViewById(R.id.spinner_conveyor);
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        // redirect to login
+        if(currentUser == null){
+            Intent myIntent = new Intent(MainActivity.this, LoginActivity.class);
+            MainActivity.this.startActivity(myIntent);
+        }
+        else{
+            // have they been connected to a company?
+//            if(sharedPref.getString("companyId", "").equals("")){
+//                Intent myIntent = new Intent(MainActivity.this, CompanyQRCodeScannerActivity.class);
+//                MainActivity.this.startActivity(myIntent);
+//            }
+        }
+
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         // .child("specific string")
         DatabaseReference myRef = database.getReference("fallenPackageEvents");
         Context n = this;
-        /*myRef.child("newPath").setValue("HELLO").addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(n,  e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-            }
-        }).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void unused) {
-                Toast.makeText(n, "SUCESS", Toast.LENGTH_LONG);
-            }
-        });*/
-
         recyclerView = findViewById(R.id.recyclerView);
 
         //conveyorArray = getResources().getStringArray(R.array.conveyorBeltId);
@@ -111,6 +123,11 @@ public class MainActivity extends AppCompatActivity {
         // Show conveyor names in spinner
         spinner = findViewById(R.id.spinner);
         showDataSpinner();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     private void showDataSpinner()

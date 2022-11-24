@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MTE460Project</string>
+    <string name="app_name">ConveyNow</string>
 
     <string-array name="conveyorBeltId">
         <item>ConveyorBelt 1</item>

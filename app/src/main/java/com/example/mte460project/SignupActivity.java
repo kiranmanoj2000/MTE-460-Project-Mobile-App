@@ -17,6 +17,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 public class SignupActivity extends AppCompatActivity {
     private EditText emailField;
@@ -49,6 +52,11 @@ public class SignupActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             Toast.makeText(SignupActivity.this, "Authentication SUCCESS.",
                                     Toast.LENGTH_SHORT).show();
+
+                            // Update the db with user
+                            HashMap<String, String> data = new HashMap<>();
+                            data.put("email", user.getEmail());
+                            FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid()).setValue(data);
 
                             // take them to the page to connect to a company
 

@@ -50,18 +50,12 @@ public class SignupActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("Signup Activity", "createUserWithEmail:failure");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Toast.makeText(SignupActivity.this, "Authentication SUCCESS.",
-                                    Toast.LENGTH_SHORT).show();
 
                             // Update the db with user
                             HashMap<String, String> data = new HashMap<>();
                             data.put("email", user.getEmail());
                             FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid()).setValue(data);
 
-                            // take them to the page to connect to a company
-
-//                            Intent myIntent = new Intent(SignupActivity.this, CompanyQRCodeScannerActivity.class);
-//                            SignupActivity.this.startActivity(myIntent);
                             Intent myIntent = new Intent(SignupActivity.this, MainActivity.class);
                             SignupActivity.this.startActivity(myIntent);
 
@@ -70,7 +64,7 @@ public class SignupActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("Signup Activity", "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(SignupActivity.this, "Authentication failed.",
+                            Toast.makeText(SignupActivity.this, "Sign up failed. Please try again.",
                                     Toast.LENGTH_SHORT).show();
                             //updateUI(null);
                         }

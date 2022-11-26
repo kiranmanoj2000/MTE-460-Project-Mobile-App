@@ -4,6 +4,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,6 +41,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.auth.FirebaseAuth;
@@ -51,31 +54,24 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     DatePickerDialog startDatePickerDialog;
     DatePickerDialog endDatePickerDialog;
 
-    Button btnDatePicker;
-
     private FirebaseAuth mAuth;
 
     private SharedPreferences sharedPref;
 
-    String conveyorArray[];
-    String dateArray[];
-
-    List<DroppedPackage> droppedPackage;
-
     RecyclerView recyclerView;
-    RecycleAdapter helperAdapter;
 
     FallenPackageAdapter fallenPackageAdapter;
 
     private Spinner conveyorBeltSpinner;
-    private ArrayList<ConveyorName> conveyorname = new ArrayList<>();
-    private ArrayList<String> conveyornamestring = new ArrayList<>();
     private DatabaseReference dbRef;
     private String companyId;
     private String conveyorBeltId;
@@ -89,8 +85,16 @@ public class MainActivity extends AppCompatActivity {
     private int setEndMonth  = Calendar.getInstance().get(Calendar.MONTH);
     private int setEndDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
+    private Date startDate;
+    private Date endDate;
+
     private TextView startDateResTextView;
     private TextView endDateResTextView;
+
+    private TextView companyNameTextView;
+    private TextView numFallenPackagesTextView;
+
+
 
     // Declare the launcher at the top of your Activity/Fragment:
     private final ActivityResultLauncher<String> requestPermissionLauncher =
@@ -126,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         mAuth = FirebaseAuth.getInstance();
         sharedPref = this.getSharedPreferences("com.example.mte460project", Context.MODE_PRIVATE);
 
@@ -139,20 +144,35 @@ public class MainActivity extends AppCompatActivity {
         }
         else{
             companyId = getCompanyId();
-            companyId = "-NFpRzghQ2GAVj8IleOF";
+
             // if they havent set up a company
             if(companyId.equals("")){
-//                Intent myIntent = new Intent(MainActivity.this, CompanyQRCodeScannerActivity.class);
-//                MainActivity.this.startActivity(myIntent);
+                Intent myIntent = new Intent(MainActivity.this, CompanyQRCodeScannerActivity.class);
+                MainActivity.this.startActivity(myIntent);
+                finish();
+                return;
             }
         }
+
         askNotificationPermission();
 
         handleFCMTokens();
 
+
+        Calendar c = Calendar.getInstance();
+        c.set(setStartYear, setStartMonth, setStartDay, 0, 0);
+        startDate = c.getTime();
+
+        c.set(setEndYear, setEndMonth, setEndDay, 0, 0);
+        endDate = c.getTime();
+
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         dbRef = database.getReference();
+
+        setCompanyName();
+
         conveyorBeltSpinner = findViewById(R.id.spinner);
+
 
         populateDateFields();
         populateConveyorBeltList();
@@ -185,7 +205,13 @@ public class MainActivity extends AppCompatActivity {
                         setStartMonth = monthOfYear;
                         setStartDay = dayOfMonth;
                         startDateResTextView.setText(setStartDay + "/" + (setStartMonth + 1) + "/" + setStartYear);
+                        Calendar c = Calendar.getInstance();
+                        c.set(setStartYear, setStartMonth, setStartDay, 0, 0);
+                        startDate = c.getTime();
+
+                        fetchFallenPackageEvents();
                     }
+
                 }, setStartYear, setStartMonth, setStartDay);
         // cant select prev dates
         startDatePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
@@ -199,36 +225,34 @@ public class MainActivity extends AppCompatActivity {
                         setEndMonth = monthOfYear;
                         setEndDay = dayOfMonth;
                         endDateResTextView.setText(setEndDay + "/" + (setEndMonth + 1) + "/" + setEndYear);
+                        Calendar c = Calendar.getInstance();
+                        c.set(setEndYear, setEndMonth, setEndDay, 0, 0);
+                        endDate = c.getTime();
+
+                        fetchFallenPackageEvents();
                     }
                 }, setEndYear, setEndMonth, setEndDay);
         // cant select prev dates
         endDatePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
     }
 
-    public void populateFallenPackageEventsList(){
-        recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    public void fetchFallenPackageEvents(){
         ArrayList<FallenPackageEvent> fallenPackageEvents = new ArrayList<>();
-        dbRef.child("fallenPackageEvents").orderByChild("companyId").equalTo(companyId).addListenerForSingleValueEvent(new ValueEventListener() {
+        dbRef.child("fallenPackageEvents").orderByChild("companyId").equalTo(companyId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                fallenPackageEvents.clear();
                 for(DataSnapshot ds:snapshot.getChildren())
                 {
                     FallenPackageEvent fallenPackageEvent = ds.getValue(FallenPackageEvent.class);
                     fallenPackageEvent.setFallenPackageEventId(ds.getKey());
-                    // only process if the conveyorbeltid matches
-//                    if(!fallenPackageEvent.getConveyorBeltId().equals(conveyorBeltId))
-//                        continue;
-
-                    // only process if date matches
-                    Toast.makeText(MainActivity.this, fallenPackageEvent.getConveyorBeltId(), Toast.LENGTH_SHORT);
-
-                    //droppedPackage.add(data);
-
-                    //DroppedPackage data = new DroppedPackage();
+                    // only process if the conveyorbeltid matches and within date range
+                    if(!fallenPackageEvent.getConveyorBeltId().equals(conveyorBeltId) || !withinDateRange(fallenPackageEvent))
+                        continue;
 
                     fallenPackageEvents.add(fallenPackageEvent);
                 }
+                numFallenPackagesTextView.setText("# Fallen Packages: " + fallenPackageEvents.size());
                 fallenPackageAdapter = new FallenPackageAdapter(fallenPackageEvents);
                 recyclerView.setAdapter(fallenPackageAdapter);
             }
@@ -238,18 +262,34 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-//
-//        Query query = dbRef.child("fallenPackageEvents").orderByChild("createdDate");
-//
-//        FirebaseRecyclerOptions<FallenPackageEvent> options = new FirebaseRecyclerOptions.Builder<FallenPackageEvent>()
-//                .setQuery(query, FallenPackageEvent.class)
-//                .build();
-//
-//        fallenPackageAdapter = new FallenPackageAdapter(options);
-//        recyclerView.setAdapter(fallenPackageAdapter);
+    }
+    public void populateFallenPackageEventsList(){
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        numFallenPackagesTextView = findViewById(R.id.numFallenPackagesTextView);
+        fetchFallenPackageEvents();
     }
 
+    public boolean withinDateRange(FallenPackageEvent fallenPackageEvent){
+        Date fallenDate = new Date(fallenPackageEvent.getCreatedDate());
+        Calendar startCal = Calendar.getInstance();
+        Calendar endCal = Calendar.getInstance();
+        Calendar fallenCal = Calendar.getInstance();
+
+        startCal.setTime(startDate);
+        endCal.setTime(endDate);
+        fallenCal.setTime(fallenDate);
+
+        if(isSameDay(startCal, fallenCal) || isSameDay(endCal, fallenCal))
+            return true;
+
+        return fallenDate.after(startDate) && fallenDate.before(endDate);
+    }
+
+    public boolean isSameDay(Calendar cal1, Calendar cal2){
+        return cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR) &&
+                cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR);
+    }
 
     public void redirectToLogin(){
         Intent myIntent = new Intent(MainActivity.this, LoginActivity.class);
@@ -273,6 +313,7 @@ public class MainActivity extends AppCompatActivity {
         {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                conveyorBelts.clear();
                 for(DataSnapshot item : snapshot.getChildren())
                 {
                     String conveyorBeltId = item.getKey();
@@ -282,6 +323,7 @@ public class MainActivity extends AppCompatActivity {
 
                     conveyorBelts.add(new ConveyorBelt(conveyorBeltId, companyId, createdDate, name));
                 }
+                conveyorBeltId = conveyorBelts.get(conveyorBelts.size()-1).getConveyorBeltId();
                 ConveyorBeltAdapter adapter = new ConveyorBeltAdapter(MainActivity.this, conveyorBelts);
                 conveyorBeltSpinner.setAdapter(adapter);
                 conveyorBeltSpinner.setOnItemSelectedListener(
@@ -294,10 +336,9 @@ public class MainActivity extends AppCompatActivity {
                                 // It returns the clicked item.
                                 ConveyorBelt clickedItem = (ConveyorBelt)
                                         parent.getItemAtPosition(position);
-                                String name = clickedItem.getName();
                                 conveyorBeltId = clickedItem.getConveyorBeltId();
-                                // TODO refetch
-                                Toast.makeText(MainActivity.this, name + " selected", Toast.LENGTH_SHORT).show();
+                                fetchFallenPackageEvents();
+
                             }
                             @Override
                             public void onNothingSelected(AdapterView<?> parent)
@@ -327,8 +368,7 @@ public class MainActivity extends AppCompatActivity {
                         // Get new FCM registration token
                         String token = task.getResult();
 
-                        Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
-                        if(!sharedPref.getString("fcmToken", "").equals(token)){
+                        if(!FCMTokenExists()){
                             pushFCMTokenToDB(token, getCompanyId());
                             sharedPref.edit().putString("fcmToken", token).apply();
                         }
@@ -346,13 +386,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String getCompanyId(){
-        return "-NFpRzghQ2GAVj8IleOF";
-        //return sharedPref.getString("companyId", "");
+
+        return sharedPref.getString("companyId", "");
     }
 
     public void signOut(View v){
         FirebaseAuth.getInstance().signOut();
         redirectToLogin();
         finish();
+    }
+
+    public void setCompanyName(){
+        companyNameTextView = (TextView) findViewById(R.id.companyName);
+        dbRef.child("companies").child(companyId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                companyNameTextView.setText(((HashMap<?, ?>) snapshot.getValue()).get("name").toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }

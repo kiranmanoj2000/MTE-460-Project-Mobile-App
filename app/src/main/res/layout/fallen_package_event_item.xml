@@ -7,8 +7,8 @@
 
 
     <androidx.cardview.widget.CardView
-        android:layout_width="232dp"
-        android:layout_height="171dp"
+        android:layout_width="325dp"
+        android:layout_height="174dp"
         app:cardBackgroundColor="@color/white"
         app:cardCornerRadius="20dp"
         app:cardElevation="10dp"
@@ -24,18 +24,19 @@
 
             <TextView
                 android:id="@+id/fallenPackageEventCreatedDate"
-                android:layout_width="99dp"
-                android:layout_height="34dp"
+                android:layout_width="207dp"
+                android:layout_height="39dp"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="16dp"
                 android:text="TextView"
+                android:textStyle="bold|italic"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/fallenPackageEventId"
-                android:layout_width="99dp"
-                android:layout_height="34dp"
+                android:layout_width="155dp"
+                android:layout_height="27dp"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="72dp"
                 android:text="TextView"
